@@ -131,14 +131,8 @@ dependencies{
         natives "com.github.Anuken.Arc:natives-freetype-android:$arcHash"
     }
 
-    def version, highestVersion
-    new File((String)findSdkDir(), "/platforms").eachFileMatch ~/android-\d+/, {
-        version = it.name.find(/\d+/).toInteger()
-        highestVersion = version > highestVersion ? version : highestVersion
-    }
-
-    def sdkFile = new File((String)findSdkDir(), "/platforms/android-${highestVersion}/android.jar")
-    if(sdkFile.exists()) compileOnly files(sdkFile.absolutePath)
+    // Android SDK android.jar is already supplied by the Android Gradle Plugin
+    // through compileSdk. Do not add it dynamically to compileOnly here.
 }
 
 task copyAndroidNatives(){
