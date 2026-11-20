@@ -1,0 +1,42 @@
+plugins {
+    id 'java-library'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+}
+
+dependencies {
+    api "com.badlogicgames.gdx:gdx:$gdxVersion"
+    api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    api "org.java-websocket:Java-WebSocket:$wsVersion"
+}
+
+sourceSets {
+    test {
+        java.srcDirs = ['src/test/java']
+    }
+}
+
+// Headless movement/collision regression checks: gradlew :core:physicsCheck
+tasks.register('physicsCheck', JavaExec) {
+    group = 'verification'
+    description = 'Runs headless player physics checks.'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tactshoot.game.PhysicsCheck'
+}
+
+// Headless touch-control checks: gradlew :core:inputCheck
+tasks.register('inputCheck', JavaExec) {
+    group = 'verification'
+    description = 'Runs headless touch joystick/look/fire direction checks.'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.tactshoot.game.InputCheck'
+}
