@@ -152,6 +152,8 @@ public class QueueScreen extends ScreenAdapter implements NetClient.Listener {
     @Override
     public void render(float delta) {
         pulse += delta;
+        // Deliver server messages (welcome / queued / match) to this screen.
+        if (net != null) net.update();
         Gdx.gl.glClearColor(Palette.BG.r, Palette.BG.g, Palette.BG.b, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
         stage.act(delta);
