@@ -1,0 +1,133 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Release signing: put your keystore details in keystore.properties (project
+// root, NEVER commit it - it is in .gitignore). See docs/BAZAAR_PUBLISHING_FA.md.
+def keystorePropsFile = rootProject.file('keystore.properties')
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+
+android {
+    namespace = 'com.tactshoot.game'
+    compileSdk = 36
+    buildToolsVersion = '36.0.0'
+
+    defaultConfig {
+        applicationId = 'com.tactshoot.game'
+        minSdk = 24
+        targetSdk = 35
+        // Bump versionCode on EVERY upload to the store (must always increase).
+        versionCode = 2
+        versionName = '1.1.0'
+    }
+
+    signingConfigs {
+        release {
+            if (keystoreProps.containsKey('storeFile')) {
+                storeFile rootProject.file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ['../assets']
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
+
+    packaging {
+        resources {
+            excludes += ['META-INF/INDEX.LIST']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = true
+            shrinkResources = true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Real phones sold in the Bazaar market are ARM; dropping x86 keeps the APK smaller.
+            ndk {
+                abiFilters 'armeabi-v7a', 'arm64-v8a'
+            }
+            if (keystoreProps.containsKey('storeFile')) {
+                signingConfig = signingConfigs.release
+            }
+        }
+    }
+
+    lint {
+        // The release build must not be blocked by style-only lint findings.
+        abortOnError = false
+    }
+}
+
+// On-device touch checks: gradlew :android:emulatorCheck
+// Installs the debug APK on a running (or freshly booted) emulator, drives real
+// touch gestures and asserts joystick, look and fire behaviour from logcat.
+tasks.register('emulatorCheck', Exec) {
+    group = 'verification'
+    description = 'Installs the debug APK on an emulator and verifies touch input.'
+    dependsOn 'assembleDebug'
+    workingDir rootProject.projectDir
+    def pythonBin = System.getenv('PYTHON') ?: (System.getProperty('os.name')
+            .toLowerCase().contains('windows') ? 'python' : 'python3')
+    commandLine pythonBin, rootProject.file('tools/emulator_check.py').absolutePath,
+            '--apk', layout.buildDirectory.file('outputs/apk/debug/android-debug.apk')
+            .get().asFile.absolutePath
+}
+
+configurations { natives }
+
+dependencies {
+    implementation project(':core')
+    implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    // Cafe Bazaar in-app billing (Poolakey, served by JitPack) and the AndroidX
+    // activity that provides the ActivityResultRegistry Poolakey needs.
+    implementation "com.github.cafebazaar.Poolakey:poolakey:$poolakeyVersion"
+    implementation "androidx.activity:activity:1.9.3"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"  // kotlin.Unit used by the billing glue
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-x86_64"
+}
+
+// Extract natives at configuration/evaluation time so AGP sourceSets picks them up reliably
+file("src/main/jniLibs").mkdirs()
+try {
+    configurations.natives.files.each { jar ->
+        def outputDir = null
+        if (jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("src/main/jniLibs/armeabi-v7a")
+        if (jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("src/main/jniLibs/arm64-v8a")
+        if (jar.name.endsWith("natives-x86.jar")) outputDir = file("src/main/jniLibs/x86")
+        if (jar.name.endsWith("natives-x86_64.jar")) outputDir = file("src/main/jniLibs/x86_64")
+        if (outputDir != null) {
+            outputDir.mkdirs()
+            copy {
+                from zipTree(jar)
+                include "*.so"
+                into outputDir
+            }
+        }
+    }
+} catch (Throwable t) {
+    println "Natives extraction notice: " + t.message
+}
