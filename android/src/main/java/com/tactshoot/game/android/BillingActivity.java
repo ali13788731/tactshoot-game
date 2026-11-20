@@ -50,7 +50,7 @@ public class BillingActivity extends ComponentActivity {
     private void startPurchase() {
         try {
             // The payload is echoed back by Bazaar; it is not trusted for security.
-            PurchaseRequest request = new PurchaseRequest(StoreConfig.PRO_SKU, "tactshoot-pro");
+            PurchaseRequest request = new PurchaseRequest(StoreConfig.PRO_SKU, "tactshoot-pro", null);
             payment.purchaseProduct(getActivityResultRegistry(), request, p -> {
                 p.purchaseFlowBegan(() -> Unit.INSTANCE);
                 p.failedToBeginFlow(t -> {
