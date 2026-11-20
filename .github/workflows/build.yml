@@ -46,7 +46,17 @@ jobs:
               echo "keyPassword=$KEY_PASSWORD"
             } > keystore.properties
           else
-            echo "No keystore secrets: building unsigned release APK"
+            echo "No keystore secrets: signing with a temporary test key (installable, NOT for store upload)"
+            keytool -genkeypair -v -keystore release.keystore -alias test \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass testpass123 -keypass testpass123 \
+              -dname "CN=TactShoot Test, O=Test, C=IR"
+            {
+              echo "storeFile=release.keystore"
+              echo "storePassword=testpass123"
+              echo "keyAlias=test"
+              echo "keyPassword=testpass123"
+            } > keystore.properties
           fi
 
       - name: Build release APK
