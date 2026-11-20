@@ -1,18 +1,13 @@
-# ---- libGDX: native code calls back into these classes by name ----
--keep class com.badlogic.gdx.** { *; }
--dontwarn com.badlogic.gdx.**
--keepclassmembers class * implements com.badlogic.gdx.utils.Json$Serializable { *; }
+-dontobfuscate
 
-# ---- WebSocket client (+ optional slf4j logging it references) ----
--keep class org.java_websocket.** { *; }
--dontwarn org.java_websocket.**
--dontwarn org.slf4j.**
+-keep class mindustry.** { *; }
+-keep class arc.** { *; }
+-keep class net.jpountz.** { *; }
+-keep class rhino.** { *; }
+-keep class com.android.dex.** { *; }
+-keep class com.android.dx.** { *; }
+-keepattributes Signature,*Annotation*,InnerClasses,EnclosingMethod
 
-# ---- Cafe Bazaar billing (Poolakey + Bazaar's AIDL interface) ----
--keep class ir.cafebazaar.poolakey.** { *; }
--keep class com.farsitel.bazaar.** { *; }
--dontwarn ir.cafebazaar.poolakey.**
+-dontwarn javax.naming.**
 
-# Keep line numbers so crash reports from the store are readable.
--keepattributes SourceFile,LineNumberTable
--renamesourcefileattribute SourceFile
+#-printusage out.txt

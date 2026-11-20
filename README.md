@@ -1,160 +1,90 @@
-# TactShoot
+![Logo](core/assets-raw/sprites/ui/logo.png)
 
-**A complete, free-to-play 3D multiplayer FPS for Android** — real-time shadows, dynamic skies, post-processing, three handcrafted maps, five weapons, smart AI bots for offline practice, and online multiplayer with matchmaking + private room codes. No Firebase, no paid backend: the entire server is one Node.js file you can host for free.
+[![Build Status](https://github.com/Anuken/Mindustry/workflows/Tests/badge.svg?event=push)](https://github.com/Anuken/Mindustry/actions)
+[![Discord](https://img.shields.io/discord/391020510269669376.svg?logo=discord&logoColor=white&logoWidth=20&labelColor=7289DA&label=Discord&color=17cf48)](https://discord.gg/mindustry)  
 
-![TactShoot](docs/banner.svg)
+The automation tower defense RTS, written in Java.
 
----
+_[Trello Board](https://trello.com/b/aE2tcUwF/mindustry-40-plans)_  
+_[Wiki](https://mindustrygame.github.io/wiki)_  
+_[Javadoc](https://mindustrygame.github.io/docs/)_ 
 
-## What's inside
+## Contributing
 
-| | |
-|---|---|
-| **Engine** | LibGDX 1.14.2 (OpenGL ES 2.0/3.0) — runs on Android 7.0+ |
-| **Graphics** | Directional light + 2048px shadow mapping, procedural sky (sun, stars, dusk), post-FX (color grade, vignette, chromatic aberration, film grain), particle system (muzzle flash, tracers, shell casings, sparks, smoke, explosions), baked-AO PBR-style textures |
-| **Maps** | Dustyard (desert outpost), Facility (dusk industrial yard), Arena (symmetric kill-box) — all with cover, verticality, interior spaces |
-| **Weapons** | Assault Rifle, SMG, Shotgun, Pistol + frag grenades. ADS, recoil, spread bloom, per-shell shotgun reload |
-| **Offline** | Practice mode vs AI bots with 3 difficulty levels, pathfinding, line-of-sight aiming and burst fire |
-| **Online** | Matchmaking (TDM/FFA), private rooms with shareable 4-letter codes, 15 Hz state sync with interpolation, server-authoritative damage, text chat, global leaderboard |
-| **Extras** | Procedurally synthesized sound effects (zero audio files), runtime-generated UI, share buttons, stats + landing page served by the game server |
+See [CONTRIBUTING](CONTRIBUTING.md) for general code style and PR guidelines.
 
-> **Publishing on Cafe Bazaar?** Read [docs/BAZAAR_PUBLISHING_FA.md](docs/BAZAAR_PUBLISHING_FA.md) (Persian): server, in-app purchase, signing, listing text.
+If you are a first-time contributor looking for features to implement or bugs to fix, see the issues tagged with 'candidate' [in the Mindustry-Suggestions repostiory](https://github.com/Anuken/Mindustry-Suggestions/issues?q=is%3Aissue%20state%3Aopen%20label%3Acandidate).
 
-## Quick start
+## Building
 
-### 1. Build the APK (Android Studio)
+Bleeding-edge builds are generated automatically for every commit. You can see them [here](https://github.com/Anuken/MindustryBuilds/releases).
 
-1. Open **Android Studio**, choose **Open**, select this folder.
-2. Wait for the Gradle sync (first sync downloads Gradle 9.3.1 + dependencies).
-3. **Build → Build App Bundle(s) / APK(s) → Build APK(s)**.
-4. Find the APK at `android/build/outputs/apk/debug/android-debug.apk` — install it on any Android 7.0+ phone, or use **Build → Generate Signed App Bundle / APK** to make a release APK for sharing.
+If you'd rather compile on your own, follow these instructions.
+First, make sure you have [JDK 17](https://adoptium.net/temurin/releases/?os=any&arch=any&version=17) installed. **Other JDK versions will not work.** Open a terminal in the Mindustry directory and run the following commands:
 
-> The project already contains `local.properties` pointing at `%LOCALAPPDATA%\Android\Sdk`. If your SDK lives elsewhere, update that file.
+### Windows
 
-### 2. Run on desktop (optional, for development)
+_Running:_ `gradlew desktop:run`  
+_Building:_ `gradlew desktop:dist`  
+_Sprite Packing:_ `gradlew tools:pack`
 
-```
-gradlew.bat :desktop:run
-```
+### Linux/Mac OS
 
-WASD move, mouse look, LMB fire, RMB aim, R reload, Q switch, G grenade, C crouch, T chat, TAB scoreboard, ESC pause.
+_Running:_ `./gradlew desktop:run`  
+_Building:_ `./gradlew desktop:dist`  
+_Sprite Packing:_ `./gradlew tools:pack`
 
-### 2b. Automated checks (optional)
+### Server
 
-```
-gradlew.bat :core:physicsCheck          # headless movement/collision regression tests
-gradlew.bat :core:inputCheck            # headless touch joystick/look/fire direction tests
-gradlew.bat :desktop:smokeRender        # boots a bot match and writes screenshots to build/smoke
-gradlew.bat :android:emulatorCheck      # installs the APK on an emulator and drives real touch input
-```
+Server builds are bundled with each released build (in Releases). If you'd rather compile on your own, replace 'desktop' with 'server', e.g. `gradlew server:dist`.
 
-`smokeRender` accepts `TACTSHOOT_QUALITY=0|1|2` (graphics preset) and `TACTSHOOT_MODE=game|gun`
-(full match or weapon-viewmodel only) so every quality tier can be verified from a terminal.
+### Android
 
-`emulatorCheck` needs a running emulator (or an installed AVD it can boot headlessly). It starts
-the game with `--ez tactshoot.debugInput true --ez tactshoot.autostartPractice true`, which turns
-on `TSDBG` logcat telemetry and jumps straight into a bot match. The script then swipes the
-joystick, drags the look area and holds the fire button through `adb shell input`, and asserts the
-game's own reported position, yaw and ammo. Pass `--check-env` to see the SDK/AVD it will use, or
-`--self-test` to validate the driver's parsing and assertions on a machine without an emulator.
+1. Install the Android SDK [here.](https://developer.android.com/studio#command-tools) Make sure you're downloading the "Command line tools only", as Android Studio is not required.
+2. In the unzipped Android SDK folder, find the cmdline-tools directory. Then create a folder inside of it called `latest` and put all of its contents into the newly created folder.
+3. In the same directory run the command `sdkmanager --licenses` (or `./sdkmanager --licenses` if on linux/mac)
+4. Set the `ANDROID_HOME` environment variable to point to your unzipped Android SDK directory.
+5. Enable developer mode on your device/emulator. If you are on testing on a phone you can follow [these instructions](https://developer.android.com/studio/command-line/adb#Enabling), otherwise you need to google how to enable your emulator's developer mode specifically.
+6. Run `gradlew android:assembleDebug` (or `./gradlew` if on linux/mac). This will create an unsigned APK in `android/build/outputs/apk`.
 
-### 3. Run the multiplayer server
+To debug the application on a connected device/emulator, run `gradlew android:installDebug android:run`.
 
-```
-cd server
-npm install
-npm start
-```
+### Troubleshooting
 
-You now have a full game server at `ws://localhost:8080` with a landing page at `http://localhost:8080/`.
+#### Permission Denied
 
-To play from your phone against your PC-hosted server:
-- **Same Wi-Fi**: in the game, *Online → GAME SERVER* field, enter `ws://<your-pc-ip>:8080`.
-- **Android emulator**: enter `ws://10.0.2.2:8080`.
+If the terminal returns `Permission denied` or `Command not found` on Mac/Linux, run `chmod +x ./gradlew` before running `./gradlew`. *This is a one-time procedure.*
 
-### 4. Deploy the server for free (so anyone can play)
+#### Where is the `mindustry.gen` package?
 
-Pick one — all support this repo as-is, no changes needed:
+As the name implies, `mindustry.gen` is generated *at build time* based on other code. You will not find source code for this package in the repository, and it should not be edited by hand.
 
-**[Render](https://render.com)** (easiest)
-1. Push this repo to GitHub.
-2. Render → *New → Web Service*, connect the repo.
-3. Root directory: `server`, build command: `npm install`, start command: `npm start`.
-4. Deploy → copy your URL like `https://tactshoot-xxxx.onrender.com`.
-5. In the game code, set `NetConfig.DEFAULT_SERVER` to `wss://tactshoot-xxxx.onrender.com` (note **wss**, not https) and rebuild the APK.
+The following is a non-exhaustive list of the "source" of generated code in `mindustry.gen`:
 
-**[Railway](https://railway.app) / [Fly.io](https://fly.io) / [Glitch](https://glitch.com)**: same idea — point any Node host at the `server/` folder, run `npm start`.
-
-The free tiers handle roughly **50–100 concurrent players** — plenty to grow a community. When you get bigger, any Node hosting (Hetzner, DigitalOcean, a $5 VPS) runs the same code unchanged.
+- `Call`, `*Packet` classes: Generated from methods marked with `@Remote`.
+- All entity classes (`Unit`, `EffectState`, `Posc`, etc): Generated from component classes in the `mindustry.entities.comp` package, and combined using definitions in `mindustry.content.UnitTypes`.
+- `Sounds`, `Musics`, `Tex`, `Icon`, etc: Generated based on files in the respective asset folders.
 
 ---
 
-## Game design
+Gradle may take up to several minutes to download files. Be patient. <br>
+After building, the output .JAR file should be in `/desktop/build/libs/Mindustry.jar` for desktop builds, and in `/server/build/libs/server-release.jar` for server builds.
 
-### Game modes
-- **Team Deathmatch** — 2 teams, first to 40 kills or 8 minutes.
-- **Free For All** — 8 players, first to 25 kills.
+## Feature Requests
 
-### Weapons
+Post feature requests and feedback [here](https://github.com/Anuken/Mindustry-Suggestions/issues/new/choose).
 
-| Weapon | Damage | Headshot | Mag | RPM | Notes |
-|---|---|---|---|---|---|
-| Assault Rifle | 25 | x2.0 | 30 | 630 | all-rounder |
-| SMG | 19 | x1.9 | 40 | 900 | close-range shredder |
-| Shotgun | 9.5 x9 | x1.6 | 8 | 69 | devastating at point blank |
-| Pistol | 34 | x2.0 | 12 | 330 | trusty sidearm |
-| Frag grenade | up to 100 | - | 2 per life | - | 6.5m blast radius |
+## AI
 
-### Controls (touch)
-- **Left half** — move joystick (push to the edge to sprint)
-- **Right half** — look
-- **Fire** (bottom right) — hold to fire; **double-tap** toggles auto-fire
-- **ADS** — tap to toggle aim-down-sights (zoom + tighter spread)
-- R reload, SW switch weapon, G grenade, ↑ jump, ↓ crouch, II pause, CH chat
+- Mindustry does not and **will never** contain art, music, sounds, icons or other assets generated by AI.
+- The same applies to any base writing in the game (`bundle.properties`).
+    - There have historically been a few user-submitted *translation* PRs that used AI (as well as terrible machine-translated ones before mainstream LLMs existed), but they are frowned upon.
+    - AI can be used to check work, but don't use it for translations verbatim, as it is usually awful and lacking context.
+    - I cannot personally verify the quality or amount of machine-translated content in a translation bundle, since I don't speak every language.
+- Pull requests with AI-generated code are **not accepted**.
+- Mindustry **does** contain code written with AI, particularly in tests.
 
-### Project layout
+## Downloads
 
-```
-├── core/       game code (Java, shared by all platforms)
-├── android/    Android launcher + APK packaging
-├── desktop/    desktop launcher (dev/testing)
-├── assets/     textures, fonts, logo
-├── server/     Node.js multiplayer server + landing page
-├── tools/      asset pipeline scripts (Python)
-└── docs/       banner, guides
-```
-
-### Networking (for tinkerers)
-
-The client talks JSON over WebSockets at 15 Hz. The server validates rate of fire, ammo, reload state, shot origin and range, applies damage authoritatively and broadcasts hits/deaths/spawns. Clients render remote players 120 ms in the past for smooth interpolation. See `server/server.js` for the full protocol — it's ~600 lines and heavily commented.
-
-Known v1 limitation: the server does not raycast against map geometry (wall-bangs are possible until a cheater shows up — see roadmap).
-
-## Roadmap ideas
-
-- Server-side map geometry for wallbang protection
-- More maps + map rotation voting
-- Killstreaks, loadout progression, unlockable skins
-- Accounts/leaderboards with Google Play sign-in
-- Voice chat (WebRTC), squads & friends
-- Gyro aiming, controller support
-- iOS + HTML5 builds (LibGDX makes both nearly free)
-
-## Credits & licenses
-
-- **Code**: MIT (see LICENSE) — yours to grow and sell.
-- **Textures**: [ambientCG](https://ambientcg.com) — CC0, thank you!
-- **Fonts**: Orbitron & Roboto — SIL Open Font License.
-- **Engine**: [LibGDX](https://libgdx.com) — Apache 2.0.
-
-Sound effects are synthesized at runtime — no third-party audio.
-
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| Gradle sync fails | Use Android Studio's bundled JDK (File → Settings → Build Tools → Gradle → JDK = Embedded JBR). The project is tested with JDK 21/25. |
-| "SDK location not found" | Edit `local.properties` → `sdk.dir=...` |
-| Can't connect online | Check the server URL (must start with `ws://` or `wss://`), check the server console, make sure the server's firewall allows the port |
-| Choppy gameplay | Lower graphics to LOW in Settings; keep the server under ~100 players |
-| App instantly closes | Your GPU must support GLES 2.0+ (every Android 7+ device does) |
+| [![](https://static.itch.io/images/badge.svg)](https://anuke.itch.io/mindustry)    |    [![](https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png)](https://play.google.com/store/apps/details?id=io.anuke.mindustry)   |    [![](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)](https://f-droid.org/packages/io.anuke.mindustry)	| [![](https://flathub.org/assets/badges/flathub-badge-en.svg)](https://flathub.org/apps/details/com.github.Anuken.Mindustry)  
+|---	|---	|---	|---	|
